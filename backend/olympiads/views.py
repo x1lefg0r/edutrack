@@ -1,0 +1,198 @@
+from django.db.models import Count, Avg, F, Min
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+    IsAdminUser,
+)
+from rest_framework.response import Response
+from gamification.models import UserActivity
+from .models import Olympiad, OlympiadRegistration
+from .serializers import OlympiadSerializer, OlympiadRegistrationSerializer
+from django.shortcuts import get_object_or_404, redirect as django_redirect
+from django.http import HttpRequest, HttpResponse, Http404
+from rest_framework.views import APIView
+from django.utils import timezone
+from subjects.models import Subject
+from subjects.serializers import SubjectSerializer
+from courses.models import Course
+from courses.serializers import CourseSerializer
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
+
+@method_decorator(cache_page(60 * 5), name="list")
+class OlympiadViewSet(viewsets.ModelViewSet):
+    serializer_class = OlympiadSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    lookup_field = "slug"
+
+    def get_queryset(self):
+        qs = (
+            Olympiad.published.all()
+            .select_related("subject")
+            .prefetch_related("stages")
+            .annotate(participants_count=Count("registrations"))
+        )
+
+        subject = self.request.query_params.get("subject")
+        level = self.request.query_params.get("level")
+        format_ = self.request.query_params.get("format")
+        search = self.request.query_params.get("search")
+        ordering = self.request.query_params.get("ordering", "-created_at")
+
+        if subject:
+            qs = qs.filter(subject__slug=subject)
+        if level:
+            qs = qs.filter(level=level)
+        if format_:
+            qs = qs.exclude(format=format_)
+        if search:
+            qs = qs.filter(title__icontains=search)  # icontains — регистронезависимый
+
+        return qs.order_by(ordering)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Http404 — если олимпиада не найдена или не опубликована
+        """
+        slug = kwargs.get("slug")
+        if not Olympiad.objects.filter(slug=slug).exists():  # exists()
+            raise Http404("Олимпиада не найдена")
+        return super().retrieve(request, *args, **kwargs)
+
+    @action(detail=False, methods=["get"])
+    def subjects_list(self, request):
+        """
+        values() — возвращает QuerySet словарей вместо объектов модели.
+        Используем когда нужны только конкретные поля — быстрее чем
+        загружать полные объекты
+        """
+        data = (
+            Olympiad.published.all()
+            .values("subject__name", "subject__slug")  # values()
+            .distinct()
+        )
+        return Response(data)
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAdminUser])
+    def titles(self, request):
+        """
+        values_list() — возвращает QuerySet кортежей.
+        flat=True когда одно поле — просто список значений
+        """
+        titles = Olympiad.objects.values_list("title", flat=True)  # values_list()
+        return Response(list(titles))
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAdminUser])
+    def unpublish(self, request, slug=None):
+        """
+        update() — обновляет записи на уровне SQL без загрузки объектов.
+        Эффективнее чем obj.save() когда нужно обновить много записей
+        """
+        olympiad = self.get_object()
+        Olympiad.objects.filter(pk=olympiad.pk).update(is_published=False)  # update()
+        return Response({"detail": "Олимпиада снята с публикации."})
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def register(self, request, slug=None):
+        olympiad = self.get_object()
+        registration, created = OlympiadRegistration.objects.get_or_create(
+            user=request.user,
+            olympiad=olympiad,
+        )
+        if not created:
+            return Response(
+                {"detail": "Вы уже зарегистрированы на эту олимпиаду."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        UserActivity.objects.create(
+            user=request.user,
+            activity_type=UserActivity.ActivityType.OLYMPIAD_REGISTRATION,
+        )
+        return Response(
+            OlympiadRegistrationSerializer(registration).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["delete"], permission_classes=[IsAuthenticated])
+    def unregister(self, request, slug=None):
+        """
+        delete() — удаляет записи на уровне SQL
+        __contains — регистрозависимый поиск (в отличие от icontains)
+        """
+        olympiad = self.get_object()
+        deleted_count, _ = OlympiadRegistration.objects.filter(
+            user=request.user,
+            olympiad=olympiad,
+            olympiad__title__contains="",  # contains — регистрозависимый
+        ).delete()  # delete()
+
+        if not deleted_count:
+            return Response(
+                {"detail": "Регистрация не найдена."}, status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAdminUser])
+    def stats(self, request, slug=None):
+        olympiad = self.get_object()
+        data = OlympiadRegistration.objects.filter(olympiad=olympiad).aggregate(
+            total_participants=Count("id"),
+            avg_score=Avg("result_score"),
+        )
+        return Response(data)
+
+
+def olympiad_redirect_view(request: HttpRequest, slug: str) -> HttpResponse:
+    """
+    Демонстрация redirect — если олимпиада не найдена редиректим на список.
+    Также используется как короткая ссылка /o/<slug>/ → /api/olympiads/<slug>/
+    """
+    olympiad = get_object_or_404(Olympiad, slug=slug, is_published=True)
+    return django_redirect(olympiad.get_absolute_url())
+
+
+class HomepageView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        # filter() — только опубликованные олимпиады с будущими этапами
+        upcoming_olympiads = (
+            Olympiad.published.all()
+            .filter(stages__start_date__gte=timezone.now())
+            .select_related("subject")
+            .prefetch_related("stages")
+            .annotate(
+                participants_count=Count("registrations", distinct=True),
+                next_stage_date=Min("stages__start_date"),  # агрегатная функция MIN
+            )
+            .order_by("next_stage_date")[:5]  # order_by()
+        )
+
+        # exclude() — исключаем курсы без записей
+        popular_courses = (
+            Course.objects.filter(is_published=True)
+            .exclude(enrollments=None)  # exclude()
+            .select_related("subject")
+            .annotate(enrollments_count=Count("enrollments", distinct=True))
+            .order_by("-enrollments_count")[:5]
+        )
+
+        # all() + distinct() — все предметы у которых есть олимпиады
+        subjects = (
+            Subject.objects.filter(olympiads__is_published=True)
+            .distinct()  # distinct()
+            .all()
+        )
+
+        return Response(
+            {
+                "upcoming_olympiads": OlympiadSerializer(
+                    upcoming_olympiads, many=True
+                ).data,
+                "popular_courses": CourseSerializer(popular_courses, many=True).data,
+                "subjects": SubjectSerializer(subjects, many=True).data,
+            }
+        )
