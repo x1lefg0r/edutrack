@@ -1,0 +1,47 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.825rem;
+  color: var(--color-muted-foreground);
+  margin: 0.25rem 0 0;
+}
+
+.link {
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  margin-top: 0.25rem;
+  transition: opacity 0.15s;
+}
+
+.link:hover {
+  opacity: 0.8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.empty {
+  color: var(--color-muted-foreground);
+  font-size: 0.9rem;
+}

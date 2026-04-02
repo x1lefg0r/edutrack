@@ -1,0 +1,137 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgb(255 255 255 / 0.8);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(14px);
+}
+
+.nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.link {
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.link:hover,
+.linkActive {
+  color: var(--color-foreground);
+  background: var(--color-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.loginLink {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+.loginLink:hover {
+  color: var(--color-foreground);
+}
+
+.registerLink {
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.registerLink:hover {
+  opacity: 0.92;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--color-muted-foreground);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.logout:hover {
+  color: var(--color-destructive);
+  background: var(--color-muted);
+}
+
+@media (max-width: 720px) {
+  .nav {
+    align-items: stretch;
+  }
+
+  .links,
+  .actions {
+    width: 100%;
+  }
+
+  .actions {
+    justify-content: space-between;
+  }
+}

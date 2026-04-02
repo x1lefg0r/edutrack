@@ -1,0 +1,96 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-muted-foreground);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.description {
+  max-width: 48rem;
+  margin: 0;
+  line-height: 1.75;
+  color: var(--color-muted-foreground);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius-lg) * 1.1);
+  background: rgb(255 255 255 / 0.78);
+  box-shadow: 0 18px 36px rgb(15 23 42 / 0.06);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.summaryText {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: 0.95rem;
+}
+
+.resultsCount {
+  font-weight: 700;
+  color: var(--color-foreground);
+}
+
+.grid {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.skeletonCard,
+.emptyState {
+  border-radius: calc(var(--radius-lg) * 1.05);
+}
+
+.skeletonCard {
+  height: 280px;
+}
+
+.emptyState {
+  margin-top: 1.5rem;
+  padding: 2rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  text-align: center;
+  color: var(--color-muted-foreground);
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-top: 1.25rem;
+  }
+}

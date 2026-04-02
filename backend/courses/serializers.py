@@ -5,9 +5,10 @@ from .models import Course, CourseEnrollment
 class CourseSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source="subject.name", read_only=True)
     olympiad_title = serializers.CharField(source="olympiad.title", read_only=True)
-    url = serializers.SerializerMethodField()
+    enrollments_count = serializers.IntegerField(read_only=True)
+    detail_url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_detail_url(self, obj):
         return obj.get_absolute_url()
 
     class Meta:
@@ -24,10 +25,11 @@ class CourseSerializer(serializers.ModelSerializer):
             "format",
             "level",
             "url",
+            "detail_url",
             "start_date",
             "end_date",
             "is_published",
-            "url",
+            "enrollments_count",
         ]
 
 

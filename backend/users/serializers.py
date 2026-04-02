@@ -14,12 +14,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "password"]
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.get_or_create(user=user)
+        return user
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", read_only=True)
     email = serializers.CharField(source="user.email", read_only=True)
+    is_staff = serializers.BooleanField(source="user.is_staff", read_only=True)
     subjects = SubjectSerializer(many=True, read_only=True)
 
     class Meta:
@@ -28,6 +31,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "is_staff",
             "avatar",
             "bio",
             "subjects",

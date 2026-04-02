@@ -12,6 +12,8 @@ class OlympiadStageSerializer(serializers.ModelSerializer):
 class OlympiadSerializer(serializers.ModelSerializer):
     stages = OlympiadStageSerializer(many=True, read_only=True)
     subject_name = serializers.CharField(source="subject.name", read_only=True)
+    participants_count = serializers.IntegerField(read_only=True)
+    next_stage_date = serializers.DateTimeField(read_only=True)
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
@@ -33,6 +35,8 @@ class OlympiadSerializer(serializers.ModelSerializer):
             "max_grade",
             "is_published",
             "stages",
+            "participants_count",
+            "next_stage_date",
             "url",
         ]
 

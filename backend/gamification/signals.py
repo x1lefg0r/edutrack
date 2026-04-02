@@ -11,7 +11,7 @@ def handle_activity(sender, instance, created, **kwargs):
     if not created:
         return
 
-    profile = Profile.objects.get(user=instance.user)
+    profile, _ = Profile.objects.get_or_create(user=instance.user)
     today = timezone.now().date()
 
     if profile.last_activity_date == today:

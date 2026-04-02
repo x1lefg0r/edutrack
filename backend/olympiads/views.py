@@ -1,4 +1,4 @@
-from django.db.models import Count, Avg, F, Min
+from django.db.models import Count, Avg, Min
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -20,6 +20,7 @@ from courses.models import Course
 from courses.serializers import CourseSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from config.permissions import IsCourseCreator
 
 
 @method_decorator(cache_page(60 * 5), name="list")
@@ -27,14 +28,32 @@ class OlympiadViewSet(viewsets.ModelViewSet):
     serializer_class = OlympiadSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "slug"
+    ordering_fields = {
+        "created_at",
+        "-created_at",
+        "title",
+        "-title",
+        "next_stage_date",
+        "-next_stage_date",
+    }
 
     def get_queryset(self):
         qs = (
-            Olympiad.published.all()
+            Olympiad.objects.all()
             .select_related("subject")
             .prefetch_related("stages")
-            .annotate(participants_count=Count("registrations"))
+            .annotate(
+                participants_count=Count("registrations"),
+                next_stage_date=Min("stages__start_date"),
+            )
         )
+
+        if not (
+            self.request.user.is_authenticated
+            and self.request.user.is_staff
+            and self.action not in ["register", "unregister"]
+        ):
+            qs = qs.filter(is_published=True)
 
         subject = self.request.query_params.get("subject")
         level = self.request.query_params.get("level")
@@ -47,18 +66,36 @@ class OlympiadViewSet(viewsets.ModelViewSet):
         if level:
             qs = qs.filter(level=level)
         if format_:
-            qs = qs.exclude(format=format_)
+            qs = qs.filter(format=format_)
         if search:
-            qs = qs.filter(title__icontains=search)  # icontains — регистронезависимый
+            qs = qs.filter(title__icontains=search)
+
+        if ordering not in self.ordering_fields:
+            ordering = "-created_at"
 
         return qs.order_by(ordering)
+
+    def get_permissions(self):
+        if self.action in [
+            "create",
+            "update",
+            "partial_update",
+            "destroy",
+            "unpublish",
+        ]:
+            return [IsCourseCreator()]
+        if self.action in ["titles", "stats"]:
+            return [IsAdminUser()]
+        if self.action in ["register", "unregister"]:
+            return [IsAuthenticated()]
+        return [IsAuthenticatedOrReadOnly()]
 
     def retrieve(self, request, *args, **kwargs):
         """
         Http404 — если олимпиада не найдена или не опубликована
         """
         slug = kwargs.get("slug")
-        if not Olympiad.objects.filter(slug=slug).exists():  # exists()
+        if not self.get_queryset().filter(slug=slug).exists():
             raise Http404("Олимпиада не найдена")
         return super().retrieve(request, *args, **kwargs)
 
@@ -70,9 +107,7 @@ class OlympiadViewSet(viewsets.ModelViewSet):
         загружать полные объекты
         """
         data = (
-            Olympiad.published.all()
-            .values("subject__name", "subject__slug")  # values()
-            .distinct()
+            Olympiad.published.all().values("subject__name", "subject__slug").distinct()
         )
         return Response(data)
 
@@ -82,7 +117,7 @@ class OlympiadViewSet(viewsets.ModelViewSet):
         values_list() — возвращает QuerySet кортежей.
         flat=True когда одно поле — просто список значений
         """
-        titles = Olympiad.objects.values_list("title", flat=True)  # values_list()
+        titles = Olympiad.objects.values_list("title", flat=True)
         return Response(list(titles))
 
     @action(detail=True, methods=["post"], permission_classes=[IsAdminUser])
@@ -92,7 +127,7 @@ class OlympiadViewSet(viewsets.ModelViewSet):
         Эффективнее чем obj.save() когда нужно обновить много записей
         """
         olympiad = self.get_object()
-        Olympiad.objects.filter(pk=olympiad.pk).update(is_published=False)  # update()
+        Olympiad.objects.filter(pk=olympiad.pk).update(is_published=False)
         return Response({"detail": "Олимпиада снята с публикации."})
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
@@ -126,8 +161,8 @@ class OlympiadViewSet(viewsets.ModelViewSet):
         deleted_count, _ = OlympiadRegistration.objects.filter(
             user=request.user,
             olympiad=olympiad,
-            olympiad__title__contains="",  # contains — регистрозависимый
-        ).delete()  # delete()
+            olympiad__title__contains="",
+        ).delete()
 
         if not deleted_count:
             return Response(
@@ -158,7 +193,6 @@ class HomepageView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        # filter() — только опубликованные олимпиады с будущими этапами
         upcoming_olympiads = (
             Olympiad.published.all()
             .filter(stages__start_date__gte=timezone.now())
@@ -166,12 +200,11 @@ class HomepageView(APIView):
             .prefetch_related("stages")
             .annotate(
                 participants_count=Count("registrations", distinct=True),
-                next_stage_date=Min("stages__start_date"),  # агрегатная функция MIN
+                next_stage_date=Min("stages__start_date"),
             )
-            .order_by("next_stage_date")[:5]  # order_by()
+            .order_by("next_stage_date")[:5]
         )
 
-        # exclude() — исключаем курсы без записей
         popular_courses = (
             Course.objects.filter(is_published=True)
             .exclude(enrollments=None)  # exclude()
@@ -180,12 +213,7 @@ class HomepageView(APIView):
             .order_by("-enrollments_count")[:5]
         )
 
-        # all() + distinct() — все предметы у которых есть олимпиады
-        subjects = (
-            Subject.objects.filter(olympiads__is_published=True)
-            .distinct()  # distinct()
-            .all()
-        )
+        subjects = Subject.objects.filter(olympiads__is_published=True).distinct().all()
 
         return Response(
             {

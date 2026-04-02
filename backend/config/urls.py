@@ -55,6 +55,7 @@ urlpatterns = [
     path("api/leaderboard/", LeaderboardView.as_view()),
     path("o/<slug:slug>/", olympiad_redirect_view, name="olympiad-redirect"),
     path("api/homepage/", HomepageView.as_view()),
+    path("api-auth/", include("rest_framework.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     urlpatterns += debug_toolbar_urls()

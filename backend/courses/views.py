@@ -7,19 +7,26 @@ from rest_framework.response import Response
 from gamification.models import UserActivity
 from .models import Course, CourseEnrollment
 from .serializers import CourseSerializer, CourseEnrollmentSerializer
+from config.permissions import IsCourseCreator
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "slug"
+    ordering_fields = {"created_at", "-created_at", "title", "-title", "start_date", "-start_date"}
 
     def get_queryset(self):
-        qs = (
-            Course.objects.filter(is_published=True)
-            .select_related("subject", "olympiad")
-            .annotate(enrollments_count=Count("enrollments"))  # annotate пример 2
+        qs = Course.objects.select_related("subject", "olympiad").annotate(
+            enrollments_count=Count("enrollments")
         )
+
+        if not (
+            self.request.user.is_authenticated
+            and self.request.user.is_staff
+            and self.action not in ["enroll"]
+        ):
+            qs = qs.filter(is_published=True)
 
         subject = self.request.query_params.get("subject")
         level = self.request.query_params.get("level")
@@ -32,9 +39,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         if level:
             qs = qs.filter(level=level)
         if format_:
-            qs = qs.exclude(format=format_)
+            qs = qs.filter(format=format_)
         if search:
             qs = qs.filter(title__icontains=search)
+
+        if ordering not in self.ordering_fields:
+            ordering = "-created_at"
 
         return qs.order_by(ordering)
 
@@ -56,3 +66,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(
             CourseEnrollmentSerializer(enrollment).data, status=status.HTTP_201_CREATED
         )
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsCourseCreator()]
+        if self.action in ["enroll"]:
+            return [IsAuthenticated()]
+        return [IsAuthenticatedOrReadOnly()]
