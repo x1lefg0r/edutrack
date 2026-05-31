@@ -119,6 +119,7 @@ export function CatalogFilters({ type }: Props) {
                 <button
                   key={value}
                   className={cn(styles.chip, active && styles.chipActive)}
+                  aria-pressed={active}
                   onClick={() => toggle(key, value)}
                 >
                   {label}
@@ -150,7 +151,7 @@ export function CatalogFilters({ type }: Props) {
       </div>
 
       {hasActiveFilters ? (
-        <button className={styles.clear} onClick={clearAll}>
+        <button className={styles.clear} onClick={clearAll} aria-label="Сбросить все фильтры">
           Сбросить
         </button>
       ) : null}

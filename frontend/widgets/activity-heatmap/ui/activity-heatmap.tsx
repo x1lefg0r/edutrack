@@ -14,7 +14,7 @@ interface Props {
   weeks?: number;
 }
 
-const DAYS = ["Пн", "", "Ср", "", "Пт", "", "Вс"];
+const DAYS = ["Пн", null, "Ср", null, "Пт", null, "Вс"];
 const MONTHS = [
   "Янв",
   "Фев",
@@ -85,7 +85,7 @@ export function ActivityHeatmap({ activities, weeks = 26 }: Props) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
-        <div className={styles.days}>
+        <div className={styles.days} aria-hidden="true">
           {DAYS.map((day, index) => (
             <span key={index} className={styles.dayLabel}>
               {day}
@@ -106,23 +106,35 @@ export function ActivityHeatmap({ activities, weeks = 26 }: Props) {
             ))}
           </div>
 
-          <div className={styles.cells}>
+          <div
+            className={styles.cells}
+            role="grid"
+            aria-label="Карта активности"
+          >
             {grid.map((week, weekIndex) => (
-              <div key={weekIndex} className={styles.week}>
-                {week.map((day) => (
-                  <div
-                    key={day.date}
-                    className={cn(styles.cell, styles[`level${getLevel(day.count)}`])}
-                    title={`${day.date}: ${day.count} действий`}
-                  />
-                ))}
+              <div key={weekIndex} className={styles.week} role="row">
+                {week.map((day) => {
+                  const label =
+                    day.count === 0
+                      ? `${day.date}: нет активности`
+                      : `${day.date}: ${day.count} ${day.count === 1 ? "действие" : day.count < 5 ? "действия" : "действий"}`;
+                  return (
+                    <div
+                      key={day.date}
+                      role="gridcell"
+                      className={cn(styles.cell, styles[`level${getLevel(day.count)}`])}
+                      aria-label={label}
+                      tabIndex={0}
+                    />
+                  );
+                })}
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className={styles.legend}>
+      <div className={styles.legend} aria-hidden="true">
         <span className={styles.legendLabel}>Меньше</span>
         {[0, 1, 2, 3, 4].map((level) => (
           <div
