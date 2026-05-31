@@ -78,7 +78,9 @@ export function ProfileClientPage() {
       <div className={styles.page}>
         <div className={styles.guestCard}>
           <span className={styles.kicker}>Профиль</span>
-          <h1 className={styles.title}>Войдите, чтобы открыть личный кабинет</h1>
+          <h1 className={styles.title}>
+            Войдите, чтобы открыть личный кабинет
+          </h1>
           <p className={styles.description}>
             После авторизации вы сможете отслеживать достижения, регистрации на
             олимпиады и прогресс по подготовительным курсам.
@@ -118,7 +120,11 @@ export function ProfileClientPage() {
               <div className={styles.identity}>
                 {me.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={me.avatar} alt={me.username} className={styles.avatar} />
+                  <img
+                    src={me.avatar}
+                    alt={me.username}
+                    className={styles.avatar}
+                  />
                 ) : (
                   <div className={styles.avatarFallback}>
                     {me.username[0].toUpperCase()}
@@ -157,7 +163,9 @@ export function ProfileClientPage() {
           <section className={styles.panel}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2 className={styles.sectionTitle}>Тепловая карта активности</h2>
+                <h2 className={styles.sectionTitle}>
+                  Тепловая карта активности
+                </h2>
                 <p className={styles.sectionText}>
                   Активность собирается из достижений, регистраций и записей на
                   курсы за последние полгода.
@@ -171,14 +179,18 @@ export function ProfileClientPage() {
             <div className={styles.sectionHeader}>
               <div>
                 <h2 className={styles.sectionTitle}>Достижения</h2>
-                <p className={styles.sectionText}>Последние разблокированные награды</p>
+                <p className={styles.sectionText}>
+                  Последние разблокированные награды
+                </p>
               </div>
             </div>
 
             {loadingAchievements ? (
               <Skeleton className={styles.listSkeleton} />
             ) : achievements.length === 0 ? (
-              <p className={styles.empty}>Пока нет достижений. Первая активность уже рядом.</p>
+              <p className={styles.empty}>
+                Пока нет достижений. Первая активность уже рядом.
+              </p>
             ) : (
               <div className={styles.list}>
                 {achievements.map((userAchievement) => (
@@ -192,7 +204,9 @@ export function ProfileClientPage() {
                       </p>
                     </div>
                     <span className={styles.itemDate}>
-                      {new Date(userAchievement.unlocked_at).toLocaleDateString("ru-RU")}
+                      {new Date(userAchievement.unlocked_at).toLocaleDateString(
+                        "ru-RU",
+                      )}
                     </span>
                   </div>
                 ))}
@@ -204,14 +218,18 @@ export function ProfileClientPage() {
             <div className={styles.sectionHeader}>
               <div>
                 <h2 className={styles.sectionTitle}>Мои олимпиады</h2>
-                <p className={styles.sectionText}>Активные и завершенные регистрации</p>
+                <p className={styles.sectionText}>
+                  Активные и завершенные регистрации
+                </p>
               </div>
             </div>
 
             {loadingRegistrations ? (
               <Skeleton className={styles.listSkeleton} />
             ) : registrations.length === 0 ? (
-              <p className={styles.empty}>Вы еще не зарегистрировались ни на одну олимпиаду.</p>
+              <p className={styles.empty}>
+                Вы еще не зарегистрировались ни на одну олимпиаду.
+              </p>
             ) : (
               <div className={styles.list}>
                 {registrations.map((registration) => (
@@ -223,10 +241,14 @@ export function ProfileClientPage() {
                       >
                         {registration.olympiad_title}
                       </Link>
-                      <p className={styles.itemMeta}>Статус: {registration.status}</p>
+                      <p className={styles.itemMeta}>
+                        Статус: {registration.status}
+                      </p>
                     </div>
                     <span className={styles.itemDate}>
-                      {new Date(registration.registered_at).toLocaleDateString("ru-RU")}
+                      {new Date(registration.registered_at).toLocaleDateString(
+                        "ru-RU",
+                      )}
                     </span>
                   </div>
                 ))}
@@ -238,14 +260,18 @@ export function ProfileClientPage() {
             <div className={styles.sectionHeader}>
               <div>
                 <h2 className={styles.sectionTitle}>Мои курсы</h2>
-                <p className={styles.sectionText}>Текущие и завершенные enrollments</p>
+                <p className={styles.sectionText}>
+                  Текущие и завершенные enrollments
+                </p>
               </div>
             </div>
 
             {loadingEnrollments ? (
               <Skeleton className={styles.listSkeleton} />
             ) : enrollments.length === 0 ? (
-              <p className={styles.empty}>Вы пока не записаны ни на один курс.</p>
+              <p className={styles.empty}>
+                Вы пока не записаны ни на один курс.
+              </p>
             ) : (
               <div className={styles.list}>
                 {enrollments.map((enrollment) => (
@@ -257,10 +283,14 @@ export function ProfileClientPage() {
                       >
                         {enrollment.course_title}
                       </Link>
-                      <p className={styles.itemMeta}>Статус: {enrollment.status}</p>
+                      <p className={styles.itemMeta}>
+                        Статус: {enrollment.status}
+                      </p>
                     </div>
                     <span className={styles.itemDate}>
-                      {new Date(enrollment.enrolled_at).toLocaleDateString("ru-RU")}
+                      {new Date(enrollment.enrolled_at).toLocaleDateString(
+                        "ru-RU",
+                      )}
                     </span>
                   </div>
                 ))}
@@ -318,7 +348,9 @@ export function ProfileClientPage() {
                 <span>Последняя активность</span>
                 <strong>
                   {me.last_activity_date
-                    ? new Date(me.last_activity_date).toLocaleDateString("ru-RU")
+                    ? new Date(me.last_activity_date).toLocaleDateString(
+                        "ru-RU",
+                      )
                     : "нет данных"}
                 </strong>
               </div>

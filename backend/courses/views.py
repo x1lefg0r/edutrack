@@ -1,6 +1,7 @@
 # courses/views.py
 from django.db.models import Count
 from rest_framework import viewsets, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
@@ -13,6 +14,7 @@ from config.permissions import IsCourseCreator
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = PageNumberPagination
     lookup_field = "slug"
     ordering_fields = {
         "created_at",
