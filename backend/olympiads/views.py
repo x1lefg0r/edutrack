@@ -18,12 +18,9 @@ from subjects.models import Subject
 from subjects.serializers import SubjectSerializer
 from courses.models import Course
 from courses.serializers import CourseSerializer
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from config.permissions import IsCourseCreator
 
 
-@method_decorator(cache_page(60 * 5), name="list")
 class OlympiadViewSet(viewsets.ModelViewSet):
     serializer_class = OlympiadSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -169,6 +166,20 @@ class OlympiadViewSet(viewsets.ModelViewSet):
                 {"detail": "Регистрация не найдена."}, status=status.HTTP_404_NOT_FOUND
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["patch"], url_path=r"registrations/(?P<registration_pk>\d+)/status", permission_classes=[IsAdminUser])
+    def update_registration_status(self, request, slug=None, registration_pk=None):
+        olympiad = self.get_object()
+        registration = get_object_or_404(OlympiadRegistration, pk=registration_pk, olympiad=olympiad)
+        new_status = request.data.get("status")
+        if new_status not in OlympiadRegistration.Status.values:
+            return Response(
+                {"detail": f"Допустимые статусы: {OlympiadRegistration.Status.values}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        registration.status = new_status
+        registration.save(update_fields=["status"])
+        return Response(OlympiadRegistrationSerializer(registration).data)
 
     @action(detail=True, methods=["get"], permission_classes=[IsAdminUser])
     def stats(self, request, slug=None):

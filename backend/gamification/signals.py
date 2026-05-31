@@ -27,6 +27,9 @@ def handle_activity(sender, instance, created, **kwargs):
     if instance.activity_type == UserActivity.ActivityType.COURSE_COMPLETED:
         _check_course_achievements(instance.user)
 
+    if instance.activity_type == UserActivity.ActivityType.OLYMPIAD_REGISTRATION:
+        _check_olympiad_achievements(instance.user)
+
 
 def _check_streak_achievements(user, current_streak: int) -> None:
     achievements = Achievement.objects.filter(
@@ -34,6 +37,16 @@ def _check_streak_achievements(user, current_streak: int) -> None:
     )
 
     for achievement in achievements:
+        UserAchievement.objects.get_or_create(user=user, achievement=achievement)
+
+
+def _check_olympiad_achievements(user) -> None:
+    from olympiads.models import OlympiadRegistration
+
+    count = OlympiadRegistration.objects.filter(user=user).count()
+    for achievement in Achievement.objects.filter(
+        trigger=Achievement.Trigger.OLYMPIAD, threshold=count
+    ):
         UserAchievement.objects.get_or_create(user=user, achievement=achievement)
 
 

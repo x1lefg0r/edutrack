@@ -32,6 +32,7 @@ from users.views import (
     MyAchievementsView,
     LeaderboardView,
 )
+from gamification.views import ActivityHeatmapView
 from django.conf import settings
 from debug_toolbar.toolbar import debug_toolbar_urls
 
@@ -53,6 +54,7 @@ urlpatterns = [
     path("api/profile/me/enrollments/", MyEnrollmentsView.as_view()),
     path("api/profile/me/achievements/", MyAchievementsView.as_view()),
     path("api/leaderboard/", LeaderboardView.as_view()),
+    path("api/gamification/activity/", ActivityHeatmapView.as_view()),
     path("o/<slug:slug>/", olympiad_redirect_view, name="olympiad-redirect"),
     path("api/homepage/", HomepageView.as_view()),
     path("api-auth/", include("rest_framework.urls")),
