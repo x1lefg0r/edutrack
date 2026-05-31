@@ -14,19 +14,18 @@ def handle_activity(sender, instance, created, **kwargs):
     profile, _ = Profile.objects.get_or_create(user=instance.user)
     today = timezone.now().date()
 
-    if profile.last_activity_date == today:
-        return
+    if profile.last_activity_date != today:
+        if profile.last_activity_date == today - timezone.timedelta(days=1):
+            profile.current_streak += 1
+        else:
+            profile.current_streak = 1
+        profile.last_activity_date = today
+        profile.max_streak = max(profile.max_streak, profile.current_streak)
+        profile.save()
+        _check_streak_achievements(instance.user, profile.current_streak)
 
-    if profile.last_activity_date == today - timezone.timedelta(days=1):
-        profile.current_streak += 1
-    else:
-        profile.current_streak = 1
-
-    profile.last_activity_date = today
-    profile.max_streak = max(profile.max_streak, profile.current_streak)
-    profile.save()
-
-    _check_streak_achievements(instance.user, profile.current_streak)
+    if instance.activity_type == UserActivity.ActivityType.COURSE_COMPLETED:
+        _check_course_achievements(instance.user)
 
 
 def _check_streak_achievements(user, current_streak: int) -> None:
@@ -35,4 +34,17 @@ def _check_streak_achievements(user, current_streak: int) -> None:
     )
 
     for achievement in achievements:
+        UserAchievement.objects.get_or_create(user=user, achievement=achievement)
+
+
+def _check_course_achievements(user) -> None:
+    from courses.models import CourseEnrollment
+
+    completed_count = CourseEnrollment.objects.filter(
+        user=user, status=CourseEnrollment.Status.COMPLETED
+    ).count()
+
+    for achievement in Achievement.objects.filter(
+        trigger=Achievement.Trigger.COURSE, threshold=completed_count
+    ):
         UserAchievement.objects.get_or_create(user=user, achievement=achievement)

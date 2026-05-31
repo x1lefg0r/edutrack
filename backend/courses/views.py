@@ -14,7 +14,14 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "slug"
-    ordering_fields = {"created_at", "-created_at", "title", "-title", "start_date", "-start_date"}
+    ordering_fields = {
+        "created_at",
+        "-created_at",
+        "title",
+        "-title",
+        "start_date",
+        "-start_date",
+    }
 
     def get_queryset(self):
         qs = Course.objects.select_related("subject", "olympiad").annotate(
@@ -70,6 +77,27 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [IsCourseCreator()]
-        if self.action in ["enroll"]:
+        if self.action in ["enroll", "complete"]:
             return [IsAuthenticated()]
         return [IsAuthenticatedOrReadOnly()]
+
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    def complete(self, request, slug=None):
+        course = self.get_object()
+        enrollment = CourseEnrollment.objects.filter(
+            user=request.user, course=course
+        ).first()
+
+        if not enrollment:
+            return Response({"detail": "Вы не записаны на этот курс."}, status=404)
+        if enrollment.status == CourseEnrollment.Status.COMPLETED:
+            return Response({"detail": "Курс уже завершён."}, status=400)
+
+        enrollment.status = CourseEnrollment.Status.COMPLETED
+        enrollment.save()
+
+        UserActivity.objects.create(
+            user=request.user,
+            activity_type=UserActivity.ActivityType.COURSE_COMPLETED,
+        )
+        return Response(CourseEnrollmentSerializer(enrollment).data)
