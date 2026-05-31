@@ -1,0 +1,1905 @@
+openapi: 3.0.3
+info:
+  title: EduTrack API
+  version: 1.0.0
+  description: API для платформы подготовки к олимпиадам
+paths:
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/courses/:
+    get:
+      operationId: courses_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - courses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourseList'
+          description: ''
+    post:
+      operationId: courses_create
+      tags:
+      - courses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+  /api/courses/{slug}/:
+    get:
+      operationId: courses_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - courses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    put:
+      operationId: courses_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - courses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    patch:
+      operationId: courses_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - courses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCourseRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+    delete:
+      operationId: courses_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - courses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/courses/{slug}/complete/:
+    post:
+      operationId: courses_complete_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - courses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+  /api/courses/{slug}/enroll/:
+    post:
+      operationId: courses_enroll_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - courses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CourseRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+          description: ''
+  /api/gamification/activity/:
+    get:
+      operationId: gamification_activity_list
+      parameters:
+      - in: query
+        name: days
+        schema:
+          type: integer
+        description: Количество дней (макс. 365)
+      tags:
+      - gamification
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityDay'
+          description: ''
+  /api/homepage/:
+    get:
+      operationId: homepage_retrieve
+      tags:
+      - homepage
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomepageResponse'
+          description: ''
+  /api/leaderboard/:
+    get:
+      operationId: leaderboard_list
+      tags:
+      - leaderboard
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+          description: ''
+  /api/olympiads/:
+    get:
+      operationId: olympiads_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOlympiadList'
+          description: ''
+    post:
+      operationId: olympiads_create
+      tags:
+      - olympiads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/olympiads/{slug}/:
+    get:
+      operationId: olympiads_retrieve
+      description: Http404 — если олимпиада не найдена или не опубликована
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+    put:
+      operationId: olympiads_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+    patch:
+      operationId: olympiads_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOlympiadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOlympiadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOlympiadRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+    delete:
+      operationId: olympiads_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/olympiads/{slug}/register/:
+    post:
+      operationId: olympiads_register_create
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/olympiads/{slug}/registrations/{registration_pk}/status/:
+    patch:
+      operationId: olympiads_registrations_status_partial_update
+      parameters:
+      - in: path
+        name: registration_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOlympiadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOlympiadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOlympiadRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/olympiads/{slug}/stats/:
+    get:
+      operationId: olympiads_stats_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/olympiads/{slug}/unpublish/:
+    post:
+      operationId: olympiads_unpublish_create
+      description: |-
+        update() — обновляет записи на уровне SQL без загрузки объектов.
+        Эффективнее чем obj.save() когда нужно обновить много записей
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OlympiadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/olympiads/{slug}/unregister/:
+    delete:
+      operationId: olympiads_unregister_destroy
+      description: |-
+        delete() — удаляет записи на уровне SQL
+        __contains — регистрозависимый поиск (в отличие от icontains)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/olympiads/subjects_list/:
+    get:
+      operationId: olympiads_subjects_list_retrieve
+      description: |-
+        values() — возвращает QuerySet словарей вместо объектов модели.
+        Используем когда нужны только конкретные поля — быстрее чем
+        загружать полные объекты
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/olympiads/titles/:
+    get:
+      operationId: olympiads_titles_retrieve
+      description: |-
+        values_list() — возвращает QuerySet кортежей.
+        flat=True когда одно поле — просто список значений
+      tags:
+      - olympiads
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Olympiad'
+          description: ''
+  /api/profile/me/:
+    get:
+      operationId: profile_me_retrieve
+      tags:
+      - profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    put:
+      operationId: profile_me_update
+      tags:
+      - profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    patch:
+      operationId: profile_me_partial_update
+      tags:
+      - profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /api/profile/me/achievements/:
+    get:
+      operationId: profile_me_achievements_list
+      tags:
+      - profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserAchievement'
+          description: ''
+  /api/profile/me/enrollments/:
+    get:
+      operationId: profile_me_enrollments_list
+      tags:
+      - profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseEnrollment'
+          description: ''
+  /api/profile/me/registrations/:
+    get:
+      operationId: profile_me_registrations_list
+      tags:
+      - profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OlympiadRegistration'
+          description: ''
+  /api/subjects/:
+    get:
+      operationId: subjects_list
+      tags:
+      - subjects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subject'
+          description: ''
+    post:
+      operationId: subjects_create
+      tags:
+      - subjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+          description: ''
+  /api/subjects/{slug}/:
+    get:
+      operationId: subjects_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - subjects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+          description: ''
+    put:
+      operationId: subjects_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - subjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+          description: ''
+    patch:
+      operationId: subjects_partial_update
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - subjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubjectRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubjectRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubjectRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+          description: ''
+    delete:
+      operationId: subjects_destroy
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - subjects
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Название
+          maxLength: 200
+        description:
+          type: string
+          title: Описание
+        icon:
+          type: string
+          format: uri
+          nullable: true
+          title: Иконка
+        trigger:
+          allOf:
+          - $ref: '#/components/schemas/TriggerEnum'
+          title: Триггер
+        threshold:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Порог
+          description: Например, 7 для стрика в 7 дней
+      required:
+      - description
+      - id
+      - threshold
+      - title
+      - trigger
+    ActivityDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        count:
+          type: integer
+      required:
+      - count
+      - date
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Название
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: integer
+          title: Предмет
+        subject_name:
+          type: string
+          readOnly: true
+        olympiad:
+          type: integer
+          nullable: true
+          title: Готовит к олимпиаде
+        olympiad_title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          title: Описание
+        format:
+          allOf:
+          - $ref: '#/components/schemas/CourseFormatEnum'
+          title: Формат
+        level:
+          allOf:
+          - $ref: '#/components/schemas/CourseLevelEnum'
+          title: Уровень
+        url:
+          type: string
+          format: uri
+          title: Ссылка на курс
+          maxLength: 200
+        detail_url:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата начала
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата окончания
+        is_published:
+          type: boolean
+          title: Опубликован
+        enrollments_count:
+          type: integer
+          readOnly: true
+      required:
+      - detail_url
+      - enrollments_count
+      - id
+      - level
+      - olympiad_title
+      - slug
+      - subject
+      - subject_name
+      - title
+      - url
+    CourseEnrollment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        course:
+          type: integer
+          title: Курс
+        course_title:
+          type: string
+          readOnly: true
+        course_slug:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CourseEnrollmentStatusEnum'
+          title: Статус
+        enrolled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата записи
+      required:
+      - course
+      - course_slug
+      - course_title
+      - enrolled_at
+      - id
+    CourseEnrollmentStatusEnum:
+      enum:
+      - enrolled
+      - in_progress
+      - completed
+      - dropped
+      type: string
+      description: |-
+        * `enrolled` - Записан
+        * `in_progress` - В процессе
+        * `completed` - Завершён
+        * `dropped` - Брошен
+    CourseFormatEnum:
+      enum:
+      - self_paced
+      - live
+      type: string
+      description: |-
+        * `self_paced` - Самостоятельный
+        * `live` - С преподавателем
+    CourseLevelEnum:
+      enum:
+      - beginner
+      - intermediate
+      - advanced
+      type: string
+      description: |-
+        * `beginner` - Начинающий
+        * `intermediate` - Средний
+        * `advanced` - Продвинутый
+    CourseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: integer
+          title: Предмет
+        olympiad:
+          type: integer
+          nullable: true
+          title: Готовит к олимпиаде
+        description:
+          type: string
+          title: Описание
+        format:
+          allOf:
+          - $ref: '#/components/schemas/CourseFormatEnum'
+          title: Формат
+        level:
+          allOf:
+          - $ref: '#/components/schemas/CourseLevelEnum'
+          title: Уровень
+        url:
+          type: string
+          format: uri
+          minLength: 1
+          title: Ссылка на курс
+          maxLength: 200
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата начала
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата окончания
+        is_published:
+          type: boolean
+          title: Опубликован
+      required:
+      - level
+      - slug
+      - subject
+      - title
+      - url
+    HomepageResponse:
+      type: object
+      properties:
+        upcoming_olympiads:
+          type: array
+          items:
+            $ref: '#/components/schemas/Olympiad'
+        popular_courses:
+          type: array
+          items: {}
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subject'
+      required:
+      - popular_courses
+      - subjects
+      - upcoming_olympiads
+    LeaderboardEntry:
+      type: object
+      properties:
+        username:
+          type: string
+        achievements_count:
+          type: integer
+        current_streak:
+          type: integer
+        max_streak:
+          type: integer
+      required:
+      - achievements_count
+      - current_streak
+      - max_streak
+      - username
+    Olympiad:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Название
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: integer
+          title: Предмет
+        subject_name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          title: Описание
+        format:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadFormatEnum'
+          title: Формат
+        level:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadLevelEnum'
+          title: Уровень
+        organizer_url:
+          type: string
+          format: uri
+          title: Сайт организатора
+          maxLength: 200
+        min_grade:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+          title: Минимальный класс
+        max_grade:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+          title: Максимальный класс
+        is_published:
+          type: boolean
+          title: Опубликована
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/OlympiadStage'
+          readOnly: true
+        participants_count:
+          type: integer
+          readOnly: true
+        next_stage_date:
+          type: string
+          format: date-time
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - level
+      - next_stage_date
+      - participants_count
+      - slug
+      - stages
+      - subject
+      - subject_name
+      - title
+      - url
+    OlympiadFormatEnum:
+      enum:
+      - online
+      - offline
+      - hybrid
+      type: string
+      description: |-
+        * `online` - Онлайн
+        * `offline` - Офлайн
+        * `hybrid` - Гибридный
+    OlympiadLevelEnum:
+      enum:
+      - school
+      - regional
+      - national
+      - international
+      type: string
+      description: |-
+        * `school` - Школьный
+        * `regional` - Региональный
+        * `national` - Всероссийский
+        * `international` - Международный
+    OlympiadRegistration:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        olympiad:
+          type: integer
+          title: Олимпиада
+        olympiad_title:
+          type: string
+          readOnly: true
+        olympiad_slug:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadRegistrationStatusEnum'
+          title: Статус
+        registered_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата регистрации
+        result_score:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          title: Результат
+      required:
+      - id
+      - olympiad
+      - olympiad_slug
+      - olympiad_title
+      - registered_at
+    OlympiadRegistrationStatusEnum:
+      enum:
+      - registered
+      - participated
+      - winner
+      - disqualified
+      type: string
+      description: |-
+        * `registered` - Зарегистрирован
+        * `participated` - Участвовал
+        * `winner` - Призёр
+        * `disqualified` - Дисквалифицирован
+    OlympiadRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: integer
+          title: Предмет
+        description:
+          type: string
+          title: Описание
+        format:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadFormatEnum'
+          title: Формат
+        level:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadLevelEnum'
+          title: Уровень
+        organizer_url:
+          type: string
+          format: uri
+          title: Сайт организатора
+          maxLength: 200
+        min_grade:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+          title: Минимальный класс
+        max_grade:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+          title: Максимальный класс
+        is_published:
+          type: boolean
+          title: Опубликована
+      required:
+      - level
+      - slug
+      - subject
+      - title
+    OlympiadStage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: Название этапа
+          maxLength: 200
+        stage_type:
+          allOf:
+          - $ref: '#/components/schemas/StageTypeEnum'
+          title: Тип этапа
+        start_date:
+          type: string
+          format: date-time
+          title: Дата начала
+        end_date:
+          type: string
+          format: date-time
+          title: Дата окончания
+        description:
+          type: string
+          title: Описание
+      required:
+      - end_date
+      - id
+      - stage_type
+      - start_date
+      - title
+    OlympiadStageRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Название этапа
+          maxLength: 200
+        stage_type:
+          allOf:
+          - $ref: '#/components/schemas/StageTypeEnum'
+          title: Тип этапа
+        start_date:
+          type: string
+          format: date-time
+          title: Дата начала
+        end_date:
+          type: string
+          format: date-time
+          title: Дата окончания
+        description:
+          type: string
+          title: Описание
+      required:
+      - end_date
+      - stage_type
+      - start_date
+      - title
+    PaginatedCourseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+    PaginatedOlympiadList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Olympiad'
+    PatchedCourseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: integer
+          title: Предмет
+        olympiad:
+          type: integer
+          nullable: true
+          title: Готовит к олимпиаде
+        description:
+          type: string
+          title: Описание
+        format:
+          allOf:
+          - $ref: '#/components/schemas/CourseFormatEnum'
+          title: Формат
+        level:
+          allOf:
+          - $ref: '#/components/schemas/CourseLevelEnum'
+          title: Уровень
+        url:
+          type: string
+          format: uri
+          minLength: 1
+          title: Ссылка на курс
+          maxLength: 200
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата начала
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: Дата окончания
+        is_published:
+          type: boolean
+          title: Опубликован
+    PatchedOlympiadRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: integer
+          title: Предмет
+        description:
+          type: string
+          title: Описание
+        format:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadFormatEnum'
+          title: Формат
+        level:
+          allOf:
+          - $ref: '#/components/schemas/OlympiadLevelEnum'
+          title: Уровень
+        organizer_url:
+          type: string
+          format: uri
+          title: Сайт организатора
+          maxLength: 200
+        min_grade:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+          title: Минимальный класс
+        max_grade:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+          title: Максимальный класс
+        is_published:
+          type: boolean
+          title: Опубликована
+    PatchedProfileRequest:
+      type: object
+      properties:
+        avatar:
+          type: string
+          format: binary
+          nullable: true
+          title: Аватар
+        bio:
+          type: string
+          title: О себе
+    PatchedSubjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 100
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          title: Описание
+        icon:
+          type: string
+          format: binary
+          nullable: true
+          title: Иконка
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          readOnly: true
+        is_staff:
+          type: boolean
+          readOnly: true
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          title: Аватар
+        bio:
+          type: string
+          title: О себе
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subject'
+          readOnly: true
+        current_streak:
+          type: integer
+          readOnly: true
+          title: Текущий стрик
+        max_streak:
+          type: integer
+          readOnly: true
+          title: Максимальный стрик
+        last_activity_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Дата последней активности
+      required:
+      - current_streak
+      - email
+      - id
+      - is_staff
+      - last_activity_date
+      - max_streak
+      - subjects
+      - username
+    ProfileRequest:
+      type: object
+      properties:
+        avatar:
+          type: string
+          format: binary
+          nullable: true
+          title: Аватар
+        bio:
+          type: string
+          title: О себе
+    Register:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          title: Имя пользователя
+          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
+            и символы @/./+/-/_.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Адрес электронной почты
+          maxLength: 254
+      required:
+      - id
+      - username
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Имя пользователя
+          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
+            и символы @/./+/-/_.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Адрес электронной почты
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - password
+      - username
+    StageTypeEnum:
+      enum:
+      - qualifying
+      - semifinal
+      - final
+      type: string
+      description: |-
+        * `qualifying` - Отборочный
+        * `semifinal` - Полуфинал
+        * `final` - Финал
+    Subject:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Название
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          title: Описание
+        icon:
+          type: string
+          format: uri
+          nullable: true
+          title: Иконка
+      required:
+      - id
+      - name
+      - slug
+    SubjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Название
+          maxLength: 100
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          title: Описание
+        icon:
+          type: string
+          format: binary
+          nullable: true
+          title: Иконка
+      required:
+      - name
+      - slug
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TriggerEnum:
+      enum:
+      - streak
+      - olympiad
+      - course
+      type: string
+      description: |-
+        * `streak` - Стрик
+        * `olympiad` - Олимпиада
+        * `course` - Курс
+    UserAchievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        achievement:
+          allOf:
+          - $ref: '#/components/schemas/Achievement'
+          readOnly: true
+        unlocked_at:
+          type: string
+          format: date-time
+          title: Дата получения
+      required:
+      - achievement
+      - id
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

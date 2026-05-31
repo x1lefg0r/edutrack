@@ -8,7 +8,7 @@ class CourseSerializer(serializers.ModelSerializer):
     enrollments_count = serializers.IntegerField(read_only=True)
     detail_url = serializers.SerializerMethodField()
 
-    def get_detail_url(self, obj):
+    def get_detail_url(self, obj) -> str:
         return obj.get_absolute_url()
 
     class Meta:

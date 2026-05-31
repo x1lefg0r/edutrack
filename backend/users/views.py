@@ -1,6 +1,7 @@
 # users/views.py — добавь новый endpoint
 from django.db.models import Count
-from rest_framework import generics, permissions
+from drf_spectacular.utils import extend_schema
+from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Profile
@@ -53,14 +54,17 @@ class MyAchievementsView(generics.ListAPIView):
         )
 
 
-class LeaderboardView(generics.ListAPIView):
-    """
-    Аннотация пример 3 — топ пользователей по количеству достижений
-    Используем related_name='achievements' который мы задали в UserAchievement
-    """
+class LeaderboardEntrySerializer(serializers.Serializer):
+    username = serializers.CharField()
+    achievements_count = serializers.IntegerField()
+    current_streak = serializers.IntegerField()
+    max_streak = serializers.IntegerField()
 
+
+class LeaderboardView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(responses={200: LeaderboardEntrySerializer(many=True)})
     def get(self, request):
         profiles = (
             Profile.objects.select_related("user")

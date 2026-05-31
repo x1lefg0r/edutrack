@@ -16,7 +16,7 @@ class OlympiadSerializer(serializers.ModelSerializer):
     next_stage_date = serializers.DateTimeField(read_only=True)
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         return obj.get_absolute_url()
 
     class Meta:

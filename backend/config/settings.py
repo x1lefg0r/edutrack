@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "gamification.apps.GamificationConfig",
     "silk",
     "corsheaders",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -62,6 +63,14 @@ MIDDLEWARE = [
     "silk.middleware.SilkyMiddleware",
 ]
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "EduTrack API",
+    "DESCRIPTION": "API для платформы подготовки к олимпиадам",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+}
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -70,6 +79,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 ROOT_URLCONF = "config.urls"
