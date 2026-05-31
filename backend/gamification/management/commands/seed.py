@@ -329,7 +329,7 @@ class Command(BaseCommand):
             )
             profile.save()
 
-            self._assign_achievements(user)
+            self._assign_achievements(user, active_days)
 
         self.stdout.write("Activities seeded")
 
@@ -351,7 +351,7 @@ class Command(BaseCommand):
 
         return streak
 
-    def _assign_achievements(self, user) -> None:
+    def _assign_achievements(self, user, active_days: list[int]) -> None:
         profile = Profile.objects.get(user=user)
 
         stats = {
@@ -365,4 +365,10 @@ class Command(BaseCommand):
         for achievement in Achievement.objects.all():
             value = stats.get(achievement.trigger)
             if value is not None and value >= achievement.threshold:
-                UserAchievement.objects.get_or_create(user=user, achievement=achievement)
+                day_offset = random.choice(active_days) if active_days else 0
+                unlocked_at = timezone.now() - timedelta(days=day_offset)
+                UserAchievement.objects.get_or_create(
+                    user=user,
+                    achievement=achievement,
+                    defaults={"unlocked_at": unlocked_at},
+                )
