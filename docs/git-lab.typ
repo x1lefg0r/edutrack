@@ -1,6 +1,6 @@
 #import "titul.typ": conf
 
-#show: conf.with(number: "X.X.X", name: "Продвинутый GIT")
+#show: conf.with(number: "8", name: "Продвинутый GIT")
 
 == Цель работы
 
@@ -28,7 +28,7 @@ cat .git/HEAD   # на что указывает HEAD
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/1.png", width: 100%, fit: "contain")),
   caption: [Вывод `git status` и `ls .git/`],
 ) <p1-structure>
 
@@ -42,7 +42,7 @@ git status      # убедиться, что node_modules не отслежив�
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/2.png", width: 100%, fit: "contain")),
   caption: [Содержимое `.gitignore` и вывод `git status`],
 ) <p2-gitignore>
 
@@ -58,7 +58,7 @@ git switch git-lab-demo     # возвращаемся на ветку
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/3.png", width: 100%, fit: "contain")),
   caption: [Предупреждение о detached HEAD при `git checkout <hash>`],
 ) <p3-checkout-hash>
 
@@ -76,7 +76,7 @@ git branch -d demo-branch-1 demo-branch-2  # удалить тестовые в�
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/4.png", width: 100%, fit: "contain")),
   caption: [Создание веток и переключение между ними],
 ) <p4-switch>
 
@@ -92,7 +92,7 @@ git revert HEAD --no-edit       # отменяем revert (возвращаем 
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/5.png", width: 100%, fit: "contain")),
   caption: [`git log --oneline` с появившимся revert-коммитом],
 ) <p5-revert>
 
@@ -113,7 +113,7 @@ git reset --hard c058d5c          # восстановить по хэшу из 
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/6.png", width: 100%, fit: "contain")),
   caption: [`git status` после `--soft` (файлы в staged) и после `--hard` (чисто)],
 ) <p6-reset>
 
@@ -128,7 +128,7 @@ git log --oneline                            # хэш изменился
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/7.png", width: 100%, fit: "contain")),
   caption: [`git log --oneline` до и после `--amend`],
 ) <p7-amend>
 
@@ -145,7 +145,7 @@ cat .git/HEAD                   # снова ref: refs/heads/git-lab-demo
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/8.png", width: 100%, fit: "contain")),
   caption: [`cat .git/HEAD` в обычном режиме и в detached HEAD],
 ) <p8-head>
 
@@ -159,7 +159,7 @@ git log --oneline -1        # должен совпадать
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/9.png", width: 100%, fit: "contain")),
   caption: [Совпадение хэша из файла ветки и из `git log`],
 ) <p9-refs>
 
@@ -174,7 +174,7 @@ git log --oneline --graph --all  # граф всех веток
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/10.png", width: 100%, fit: "contain")),
   caption: [Вывод `git log --oneline --graph --all`],
 ) <p10-log>
 
@@ -227,7 +227,7 @@ git checkout -- README.md              # откат тестового изме�
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/13.png", width: 100%, fit: "contain")),
   caption: [`git stash list` и `git stash pop`],
 ) <p13-stash>
 
@@ -245,7 +245,7 @@ git log --oneline               # коммит вернулся
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/14.png", width: 100%, fit: "contain")),
   caption: [`git reflog` с видимым «потерянным» коммитом],
 ) <p14-reflog>
 
@@ -260,7 +260,7 @@ git revert HEAD --no-edit       # отменяем cherry-pick
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/15.png", width: 100%, fit: "contain")),
   caption: [`git log --oneline` с перенесённым коммитом],
 ) <p15-cherry-pick>
 
@@ -280,7 +280,7 @@ git rebase -i HEAD~3  # меняем pick → squash для нужных ком�
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/16.png", width: 100%, fit: "contain")),
   caption: [`git log --oneline` до и после squash],
 ) <p16-squash>
 
@@ -297,7 +297,7 @@ git branch -d feature-demo
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/17.png", width: 100%, fit: "contain")),
   caption: [`git log --oneline` ветки до и после `rebase --onto`],
 ) <p17-rebase-onto>
 
@@ -312,7 +312,7 @@ git blame --date=short README.md
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/18.png", width: 100%, fit: "contain")),
   caption: [Вывод `git blame README.md`],
 ) <p18-blame>
 
@@ -336,7 +336,7 @@ git bisect reset
 ```
 
 #figure(
-  rect(width: 100%, height: 7cm, stroke: 0.5pt)[],
+  rect(image("../screenshots/19.png", width: 100%, fit: "contain")),
   caption: [Вывод `git bisect` с найденным «плохим» коммитом],
 ) <p19-bisect>
 
