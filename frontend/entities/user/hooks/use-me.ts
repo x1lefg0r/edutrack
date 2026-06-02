@@ -60,3 +60,12 @@ export function useUpdateMe() {
     onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.me }),
   });
 }
+
+export function useUpdateAvatar() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: userApi.updateAvatar,
+    onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.me }),
+  });
+}

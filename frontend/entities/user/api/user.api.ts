@@ -18,6 +18,15 @@ export const userApi = {
     return data;
   },
 
+  updateAvatar: async (file: File): Promise<Profile> => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const { data } = await apiClient.patch<Profile>("/profile/me/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
   myRegistrations: async (): Promise<OlympiadRegistration[]> => {
     const { data } = await apiClient.get<OlympiadRegistration[]>(
       "/profile/me/registrations/",

@@ -11,6 +11,7 @@ import {
   useMyEnrollments,
   useMyRegistrations,
   useUpdateMe,
+  useUpdateAvatar,
 } from "@/entities/user/hooks/use-me";
 import { ActivityHeatmap } from "@/widgets/activity-heatmap/ui/activity-heatmap";
 import styles from "./profile-page.module.css";
@@ -41,6 +42,8 @@ export function ProfileClientPage() {
   const { data: achievements = [], isLoading: loadingAchievements } =
     useMyAchievements();
   const { mutate: updateMe, isPending: savingProfile } = useUpdateMe();
+  const { mutate: updateAvatar, isPending: uploadingAvatar } =
+    useUpdateAvatar();
 
   const [bioDraft, setBioDraft] = useState<string | null>(null);
 
@@ -118,18 +121,35 @@ export function ProfileClientPage() {
           <section className={styles.panel}>
             <div className={styles.profileTop}>
               <div className={styles.identity}>
-                {me.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={me.avatar}
-                    alt={me.username}
-                    className={styles.avatar}
+                <label className={styles.avatarUpload}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className={styles.avatarInput}
+                    aria-label="Загрузить аватар"
+                    disabled={uploadingAvatar}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) updateAvatar(file);
+                      event.target.value = "";
+                    }}
                   />
-                ) : (
-                  <div className={styles.avatarFallback}>
-                    {me.username[0].toUpperCase()}
-                  </div>
-                )}
+                  {me.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={me.avatar}
+                      alt={me.username}
+                      className={styles.avatar}
+                    />
+                  ) : (
+                    <div className={styles.avatarFallback}>
+                      {me.username[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span className={styles.avatarOverlay} aria-hidden="true">
+                    {uploadingAvatar ? "..." : "Сменить"}
+                  </span>
+                </label>
 
                 <div className={styles.identityText}>
                   <h2 className={styles.sectionTitle}>{me.username}</h2>
